@@ -29,6 +29,11 @@ class Netcdfviewer(TethysAppBase):
                 url='netcdfviewer',
                 controller='netcdfviewer.controllers.home'
             ),
+            UrlMap(
+                name='files',
+                url='netcdfviewer/files',
+                controller='netcdfviewer.controllers.files'
+            ),
         )
 
         return url_maps

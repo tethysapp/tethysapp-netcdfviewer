@@ -8,7 +8,24 @@
 {% endblock %}
 
 {% block app_content %}
-  <div id="map"></div>
+  <div id="main-body">
+    <div id="map"></div>
+    <div id="lower-content">
+      <div style="width: 50%; height: 100%; float: left;">
+        <div style="width: 90%; height: 86%; margin: 2% 5% 0% 5%; border-style: solid; border-width: 1px;">
+          <button class="fa fa-angle-double-up" style="float: left; height: 26px; width: 5%; margin: 5px 0px 10px 5%"></button>
+          <input id="url-input" type="text" placeholder="Thredds URL" style="width: 80%; margin: 5px 0px 10px 0px; display: inline-block">
+          <button class="fa fa-save" style="float: right; height: 26px; width: 5%; margin: 5px 5% 10px 0px"></button>
+          <div id="filetree-div" style="width: 100%; height: 60%; overflow-y: scroll;"></div>
+        </div>
+      </div>
+      <div style="width: 50%; float: right;">
+        {% for var in variables %}
+          <p>{{ var }}</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
 {% endblock %}
 
 {# Use the after_app_content block for modals #}

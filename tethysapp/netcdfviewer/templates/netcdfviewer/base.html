@@ -16,16 +16,15 @@
   <br>
 
   <div>
-    <div style="text-align: center;">
+    <!--<div style="text-align: center;">
       <b>Specify TDS</b>
     </div>
     <br>
-    {% gizmo server_input %}
-    {% gizmo file_input %}
-    {% gizmo variable_input %}
+    {# gizmo server_input #}
+    {# gizmo file_input #}
     <button id="get-wmslayer" class="nav-button">GET NETCDF</button>
-    <button id="get-metadata" class="nav-button">GET METADATA</button>
-    <br><br><br>
+    <select id="variable-input">{% for var in variables %}<option>{{ var }}</option>{% endfor %}</select>
+    <br><br><br>-->
     <div style="text-align: center;">
       <b style="color: #333333">Layer View Options</b>
     </div>
@@ -57,6 +56,8 @@
 
   {# Stylesheets for map #}
   <link href="{% static 'netcdfviewer/css/main.css' %}" rel="stylesheet"/>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 {% endblock %}
 
 {% block scripts %}

@@ -1,7 +1,7 @@
 let mapObj = map();
 let basemapObj = basemaps();
-let dataLayerObj = data_layer();
-let layerControlObj = L.control.layers(basemapObj,{'netcdf Layer':dataLayerObj}).addTo(mapObj);
+//let dataLayerObj = data_layer();
+let layerControlObj = L.control.layers(basemapObj,/*{'netcdf Layer':dataLayerObj}*/).addTo(mapObj);
 
 function map() {
   return map = L.map('map', {
@@ -44,30 +44,33 @@ function data_layer() {
   if (firstlayeradded == true) {
     mapObj.removeLayer(dataLayerObj);
   }
-  const wmsurl = $('#server-input').val() + $('#file-path-input').val();
-  const layer = $('#variable-input').val();
-  const range = $('#wmslayer-bounds').val();
-  const style = $('#wmslayer-style').val();;
-  const wmsLayer = L.tileLayer.wms(wmsurl, {
-    layers: layer,
-    dimension: 'time',
-    useCache: true,
-    crossOrigin: false,
-    format: 'image/png',
-    transparent: true,
-    opacity: 0.8,
-    BGCOLOR: '0x000000',
-    styles: style,
-    colorscalerange: range,
-  });
+  try {
+    const wmsurl = $('#server-input').val() + $('#file-path-input').val();
+    const layer = $('#variable-input').val();
+    const range = $('#wmslayer-bounds').val();
+    const style = $('#wmslayer-style').val();
+    const wmsLayer = L.tileLayer.wms(wmsurl, {
+      layers: layer,
+      dimension: 'time',
+      useCache: true,
+      crossOrigin: false,
+      format: 'image/png',
+      transparent: true,
+      BGCOLOR: '0x000000',
+      styles: style,
+      colorscalerange: range,
+    });
 
-  wmsLayerTime = L.timeDimension.layer.wms(wmsLayer, {
-    name: 'time',
-    requestTimefromCapabilities: true,
-    updateTimeDimension: true,
-    updateTimeDimensionMode: 'replace',
-    cache: 20,
-  });
-  firstlayeradded = true;
-  return wmsLayerTime.addTo(mapObj);
+    wmsLayerTime = L.timeDimension.layer.wms(wmsLayer, {
+      name: 'time',
+      requestTimefromCapabilities: true,
+      updateTimeDimension: true,
+      updateTimeDimensionMode: 'replace',
+      cache: 20,
+    });
+    firstlayeradded = true;
+    return wmsLayerTime.addTo(mapObj);
+  } catch(err) {
+    alert('Invalid values.');
+  }
 }
