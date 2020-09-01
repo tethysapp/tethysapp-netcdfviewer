@@ -16,15 +16,7 @@
   <br>
 
   <div>
-    <!--<div style="text-align: center;">
-      <b>Specify TDS</b>
-    </div>
     <br>
-    {# gizmo server_input #}
-    {# gizmo file_input #}
-    <button id="get-wmslayer" class="nav-button">GET NETCDF</button>
-    <select id="variable-input">{% for var in variables %}<option>{{ var }}</option>{% endfor %}</select>
-    <br><br><br>-->
     <div style="text-align: center;">
       <b style="color: #333333">Layer View Options</b>
     </div>
@@ -37,6 +29,13 @@
   </div>
   {% gizmo layer_style %}
   {% gizmo layer_range %}
+  <br>
+  <div style="text-align: center;">
+    <b style="color: #333333">Shape Layers</b>
+  </div>
+  <br>
+  <button id="upload-shp">Upload Shapefile</button>
+  <button id="zoom-shp">Zoom to Shapefile</button>
 {% endblock %}
 
 {% block app_content %}
@@ -70,13 +69,18 @@
   <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/0.4.2/leaflet.draw.js"></script>
 
+  {# Scripts for plotly #}
+  <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+
   {# Scripts for Esri #}
   <script src="https://unpkg.com/esri-leaflet@2.4.0/dist/esri-leaflet.js"
           integrity="sha512-kq0i5Xvdq0ii3v+eRLDpa++uaYPlTuFaOYrfQ0Zdjmms/laOwIvLMAxh7cj1eTqqGG47ssAcTY4hjkWydGt6Eg=="
           crossorigin=""></script>
 
   {# Scripts for app #}
+  <script src="{% static 'netcdfviewer/js/shapefile.js' %}" type="text/javascript"></script>
   <script src="{% static 'netcdfviewer/js/main.js' %}" type="text/javascript"></script>
   <script src="{% static 'netcdfviewer/js/map.js' %}" type="text/javascript"></script>
   <script src="{% static 'netcdfviewer/js/draw.js' %}" type="text/javascript"></script>
+  <script src="{% static 'netcdfviewer/js/timeseries.js' %}" type="text/javascript"></script>
 {% endblock %}

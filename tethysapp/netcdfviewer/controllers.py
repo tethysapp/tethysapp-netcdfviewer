@@ -11,16 +11,6 @@ from bs4 import BeautifulSoup
 def home(request):
     """
     Controller for the app home page.
-
-    server_input = TextInput(display_text='Thredds server',
-                             name='server-input',
-                             initial='https://thredds.servirglobal.net',
-                             )
-    file_input = TextInput(display_text='WMS file path',
-                           name='file-path-input',
-                           initial='/thredds/wms/climateserv/ucsb-chirps/global'
-                                   '/0.05deg/daily/ucsb-chirps.daily.2020.nc4',
-                           )
     """
     layer_style = SelectInput(display_text='Select Color Style',
                               name='wmslayer-style',
@@ -37,21 +27,9 @@ def home(request):
                             initial='0,100',
                             )
 
-    od_url = 'https://thredds.servirglobal.net/thredds/dodsC/climateserv/ucsb-chirps-gefs' \
-             '/global/0.05deg/10dy/ucsb-chirps-gefs.daily.2020.nc4'
-    ds = xr.open_dataset(od_url)
-
-    variables = []
-
-    for var in ds.data_vars:
-        variables.append(var)
-
     context = {
-        #'server_input': server_input,
-        #'file_input': file_input,
         'layer_style': layer_style,
         'layer_range': layer_range,
-        'variables': variables,
     }
 
     return render(request, 'netcdfviewer/home.html', context)
@@ -61,11 +39,36 @@ def files(request):
     url = request.GET['url']
     response = requests.get(url, verify=False)
     soup = BeautifulSoup(response.text)
+    correct_url = soup.title.text
+    correct_url = correct_url.replace('TdsStaticCatalog ', '')
+    correct_url = correct_url.replace('Catalog ', '')
+    correct_url = correct_url.replace(' ', '')
     files = {}
 
     for link in soup.find_all('a'):
         if hasattr(link.tt, 'text'):
             files[link.tt.text] = link.get('href')
+            folder = True
 
-    print(files)
-    return JsonResponse({'url': url, 'files': files})
+    if files == {}:
+        for link in soup.find_all('li'):
+            if not link.find_all('b') == []:
+                files[link.b.text] = link.a.text
+        folder = False
+        if files == {}:
+            files = False
+
+    return JsonResponse({'folder': folder, 'files': files, 'correct_url': correct_url})
+
+
+def metadata(request):
+    url = request.GET['odurl']
+    ds = xr.open_dataset(url)
+    variables = []
+
+    for var in ds.data_vars:
+        variables.append(var)
+
+    attrs = ds.attrs
+
+    return JsonResponse({'variables': variables, 'attrs': attrs})

@@ -19,8 +19,3 @@ let drawControl = new L.Control.Draw({
 
 /* Add the controls to the map */
 mapObj.addControl(drawControl);
-
-/* Controls for when drawing on the maps */
-mapObj.on(L.Draw.Event.CREATED, function (event) {
-    drawnItems.addLayer(event.layer);
-});

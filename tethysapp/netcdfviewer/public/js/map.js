@@ -1,7 +1,6 @@
 let mapObj = map();
 let basemapObj = basemaps();
-//let dataLayerObj = data_layer();
-let layerControlObj = L.control.layers(basemapObj,/*{'netcdf Layer':dataLayerObj}*/).addTo(mapObj);
+let layerControlObj = L.control.layers(basemapObj,).addTo(mapObj);
 
 function map() {
   return map = L.map('map', {
@@ -45,7 +44,6 @@ function data_layer() {
     mapObj.removeLayer(dataLayerObj);
   }
   try {
-    const wmsurl = $('#server-input').val() + $('#file-path-input').val();
     const layer = $('#variable-input').val();
     const range = $('#wmslayer-bounds').val();
     const style = $('#wmslayer-style').val();

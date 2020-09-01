@@ -34,6 +34,31 @@ class Netcdfviewer(TethysAppBase):
                 url='netcdfviewer/files',
                 controller='netcdfviewer.controllers.files'
             ),
+            UrlMap(
+                name='metadata',
+                url='netcdfviewer/metadata',
+                controller='netcdfviewer.controllers.metadata'
+            ),
+            UrlMap(
+                name='uploadShapefile',
+                url='netcdfviewer/shapefile/uploadShapefile/',
+                controller='netcdfviewer.shapefile.uploadShapefile'
+            ),
+            UrlMap(
+                name='user_geojson',
+                url='netcdfviewer/shapefile/user_geojsons/',
+                controller='netcdfviewer.shapefile.user_geojsons'
+            ),
+            UrlMap(
+                name='get_point_values',
+                url='netcdfviewer/timeseries/get_point_values/',
+                controller='netcdfviewer.timeseries.get_point_values'
+            ),
+            UrlMap(
+                name='get_box_values',
+                url='netcdfviewer/timeseries/get_box_values/',
+                controller='netcdfviewer.timeseries.get_box_values'
+            ),
         )
 
         return url_maps
