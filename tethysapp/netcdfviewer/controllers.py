@@ -2,9 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from tethys_sdk.permissions import login_required
 from tethys_sdk.gizmos import Button, TextInput, SelectInput, RangeSlider
+from bs4 import BeautifulSoup
 import xarray as xr
 import requests
-from bs4 import BeautifulSoup
 
 
 @login_required()
@@ -38,7 +38,7 @@ def home(request):
 def files(request):
     url = request.GET['url']
     response = requests.get(url, verify=False)
-    soup = BeautifulSoup(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
     correct_url = soup.title.text
     correct_url = correct_url.replace('TdsStaticCatalog ', '')
     correct_url = correct_url.replace('Catalog ', '')
@@ -70,5 +70,9 @@ def metadata(request):
         variables.append(var)
 
     attrs = ds.attrs
+    str_attrs = {}
 
-    return JsonResponse({'variables': variables, 'attrs': attrs})
+    for attr in attrs:
+        str_attrs[str(attr)] = str(attrs[attr])
+
+    return JsonResponse({'variables': variables, 'attrs': str_attrs})

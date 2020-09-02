@@ -12,8 +12,8 @@ class Netcdfviewer(TethysAppBase):
     package = 'netcdfviewer'
     root_url = 'netcdfviewer'
     color = '#1600F0'
-    description = ''
-    tags = ''
+    description = 'An app for viewing files on a Thredds Data Serrver'
+    tags = 'netCDF4, CHIRPS,'
     enable_feedback = False
     feedback_emails = []
 

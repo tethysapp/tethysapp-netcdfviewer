@@ -10,5 +10,9 @@ requirements:
     channels:
       - conda-forge
     packages:
+      - geopandas
+      - xarray
+      - requests
+      - beautifulsoup4
   pip:
 post:
