@@ -38,17 +38,12 @@
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 26px"><span aria-hidden="true">X</span></button>
           <h5 class="modal-title" id="help-modal-label">Example Modal</h5>
         </div>
         <div class="modal-body">
-          <p>You can add custom buttons to the app header using the <code>header_buttons</code> block. Use anchor/link tags for the button and wrap it in a div with the class <code>header-button</code>. For buttons with the gliphyicons, add the <code>glyphicon-button</code> class as well.</p>
-          <p>Ever have trouble using a modal in a Tethys app? Use the <code>after_app_content</code> block for modal content to allow them to function properly. See: <a href="https://getbootstrap.com/javascript/#modals">Bootstrap Modals</a></p>
-          <p>Add tooltips to any element by adding the <code>data-toggle</code>, <code>data-placement</code>, and <code>title</code> attributes to the button. See: <a href="https://getbootstrap.com/javascript/#tooltips">Bootstrap Tooltips</a></p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-          <button type="button" class="btn btn-primary" data-dismiss="modal">OK</button>
+          <p>To view a dataset, enter the Thredds server url into the input bar bottom toolbar.
+          Navigate to the file you want to view and select it. </p>
         </div>
       </div>
     </div>
@@ -59,7 +54,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document" style="width: 50%">
       <div class="modal-content">
         <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" ><span aria-hidden="true">X</span></button>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="width: 26px"><span aria-hidden="true">X</span></button>
         </div>
         <form action="" method="post" enctype="multipart/form-data">
           {% csrf_token %}
@@ -69,7 +64,7 @@
           <div>
             <input type="file" class="local-file-upload" id="shapefile-upload"
                    style="display: inline-block" accept=".shp,.prj,.shx,.dbf," multiple>
-            <button type="button" class="btn btn-success" id="uploadshp">Submit Shapefile</button>
+            <button type="button" class="btn btn-success" id="uploadshp" style="width: 200px">Submit Shapefile</button>
           </div>
           <div>
             <br>
