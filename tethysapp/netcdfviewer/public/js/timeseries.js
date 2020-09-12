@@ -1,39 +1,13 @@
 let chartdata = {};
 
 drawnItems.on('click', function (e) {
-  var layer = e.layer;
-  if (layer instanceof L.Rectangle) {
-    var type = 'rectangle';
-    var coord = layer.getLatLngs();
-    var coords = {'_southWest': {'lat': 0, 'lng': 0}, '_northEast': {'lat': 0, 'lng': 0}};
-    coords['_northEast'].lat = coord[0][2].lat;
-    coords['_southWest'].lng = coord[0][0].lng;
-    coords['_southWest'].lat = coord[0][0].lat;
-    coords['_northEast'].lng = coord[0][2].lng;
-  } else {
-    var type = 'marker';
-    var coords = layer.getLatLng();
-  }
-  get_timeseries(type, coords);
+  get_coords(e);
 });
 
 /* Controls for when drawing on the maps */
 mapObj.on(L.Draw.Event.CREATED, function (e) {
   drawnItems.addLayer(e.layer);
-  var layer = e.layer;
-  if (layer instanceof L.Rectangle) {
-    var type = 'rectangle';
-    var coord = layer.getLatLngs();
-    var coords = {'_southWest': {'lat': 0, 'lng': 0}, '_northEast': {'lat': 0, 'lng': 0}};
-    coords['_northEast'].lat = coord[0][2].lat;
-    coords['_southWest'].lng = coord[0][0].lng;
-    coords['_southWest'].lat = coord[0][0].lat;
-    coords['_northEast'].lng = coord[0][2].lng;
-  } else {
-    var type = 'marker';
-    var coords = layer.getLatLng();
-  }
-  get_timeseries(type, coords);
+  get_coords(e);
 });
 
 shpLayer.on('click', function (e) {
@@ -44,68 +18,84 @@ shpLayer.on('click', function (e) {
   get_timeseries(type, coords);
 });
 
+function get_coords(e) {
+  var layer = e.layer;
+  if (layer instanceof L.Rectangle) {
+    var type = 'rectangle';
+    var coord = layer.getLatLngs();
+    var coords = {'_southWest': {'lat': 0, 'lng': 0}, '_northEast': {'lat': 0, 'lng': 0}};
+    console.log(coords);
+    coords['_northEast'].lat = coord[0][2].lat;
+    coords['_southWest'].lng = coord[0][0].lng;
+    coords['_southWest'].lat = coord[0][0].lat;
+    coords['_northEast'].lng = coord[0][2].lng;
+  } else {
+    var type = 'marker';
+    var coords = layer.getLatLng();
+  }
+  get_timeseries(type, coords);
+}
+
 function get_timeseries(type, coords) {
   if (odurl == '') {
     alert('Please select a data layer.');
   } else {
     if (type === 'marker') {
-      var lat = coords.lat;
-      var lng = coords.lng;
-      var vars = $('#variable-input').val();
-      $.ajax({
-        url: 'timeseries/get_point_values/',
-        data: {
-          'lat': lng,
-          'lon': lat,
-          'odurl': odurl,
-          'var': vars,
-        },
-        dataType: 'json',
-        contentType: "application/json",
-        method: 'GET',
-        success: function (result) {
-          var x = result['x'];
-          var y = result['y'];
-          chartdata.x = x;
-          chartdata.y = y;
-          draw_graph(x, y);
-          $('#timeseries-model').modal('show');
-        },
-      });
+      var coord = [];
+      coord.push(coords.lat);
+      coord.push(coords.lng);
+      var maxlat = coord[0] + 0.5;
+      var maxlng = coord[1] + 0.5;
+      var minlat = coord[0] - 0.5;
+      var minlng = coord[1] - 0.5;
     } else if (type === 'rectangle') {
+      var coord = false;
       var maxlat = coords['_northEast'].lat;
-      var maxlng = coords['_southWest'].lng;
+      var maxlng = coords['_northEast'].lng;
       var minlat = coords['_southWest'].lat;
-      var minlng = coords['_northEast'].lng;
-
-      var vars = $('#variable-input').val();
-      $.ajax({
-        url: 'timeseries/get_box_values/',
-        data: {
-          'maxlat': maxlat,
-          'maxlng': maxlng,
-          'minlat': minlat,
-          'minlng': minlng,
-          'odurl': odurl,
-          'var': vars,
-        },
-        dataType: 'json',
-        contentType: "application/json",
-        method: 'GET',
-        success: function (result) {
-          var x = result['x'];
-          var y = result['y'];
-          chartdata.x = x;
-          chartdata.y = y;
-          draw_graph(x, y);
-          $('#timeseries-model').modal('show');
-        },
-      });
+      var minlng = coords['_southWest'].lng;
     }
+
+    var vars = $('#variable-input').val();
+    $.ajax({
+      url: 'timeseries/get_box_values/',
+      data: {
+        'maxlat': maxlat,
+        'maxlng': maxlng,
+        'minlat': minlat,
+        'minlng': minlng,
+        'coord': JSON.stringify(coord),
+        'odurl': odurl,
+        'var': vars,
+      },
+      dataType: 'json',
+      contentType: "application/json",
+      method: 'GET',
+      success: function (result) {
+        var data = result['data'];
+        var time = result['time'];
+        var value = result['value'];
+        draw_graph(data, time, value);
+        $('#timeseries-model').modal('show');
+      },
+    });
   }
 }
 
-function draw_graph(x, y) {
+function draw_graph(data, time, value) {
+    var series = $.parseJSON(data);
+    var length = Object.keys(series[time]).length;
+    let x = [];
+    let y = [];
+    var i;
+    for (i = 0; i < length; i++) {
+        x.push(series[time][i]);
+        y.push(series[value][i]);
+    }
+
+    console.log(x)
+    console.log(y)
+
     let variable = $('#variable-input').val();
     let layout = {
         title: 'Mean of ' + variable,

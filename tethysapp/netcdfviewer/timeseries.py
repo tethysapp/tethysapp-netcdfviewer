@@ -1,35 +1,36 @@
 from django.http import JsonResponse
 import xarray
+import geomatics
+import json
 import requests
-
-
-def get_point_values(request):
-    lat = request.GET['lat']
-    lon = request.GET['lon']
-    url = request.GET['odurl']
-    var = request.GET['var']
-
-    ds = xarray.open_dataset(url)
-    time_series = ds[var].sel(latitude=lat, longitude=lon, method='nearest')
-    yvals = time_series.values.tolist()
-    xvals = time_series['time'].dt.strftime('%Y-%m-%dT%H:%M:%S').values.tolist()
-
-    return JsonResponse({'x': xvals, 'y': yvals})
-
 
 def get_box_values(request):
     maxlat = float(request.GET['maxlat'])
     maxlon = float(request.GET['maxlng'])
     minlat = float(request.GET['minlat'])
     minlon = float(request.GET['minlng'])
+    coord = json.loads(request.GET['coord'])
     url = request.GET['odurl']
     var = request.GET['var']
+    path_to_netCDF = '/Users/jonjones/tethys-apps/apps/tethysapp-netcdfviewer/tethysapp/netcdfviewer/workspaces/app_workspace/temp.nc'
 
     ds = xarray.open_dataset(url)
-    time_series = ds[var].sel(latitude=slice(maxlat, minlat), longitude=slice(maxlon, minlon)).mean(dim=['latitude', 'longitude'])
 
-    yvals = time_series.values.tolist()
-    xvals = time_series['time'].dt.strftime('%Y-%m-%dT%H:%M:%S').values.tolist()
-    print(time_series)
+    time_series = ds[var].sel(latitude=slice(maxlat, minlat), longitude=slice(minlon, maxlon))
+    time_series.to_netcdf(path=path_to_netCDF)
+    print('type: ' + str(coord))
+    if not coord is False:
+        print('if')
+        data = geomatics.timeseries.point([path_to_netCDF], var, (coord[0], coord[1]), dims=('latitude', 'longitude'), t_var='time')
+        time = 'datetime'
+        value = 'values'
+    else:
+        print('then')
+        data = geomatics.timeseries.full_array_stats([path_to_netCDF], var, t_var='time')
+        time = 'datetime'
+        value = 'mean'
 
-    return JsonResponse({'x': xvals, 'y': yvals})
+    print(data)
+
+
+    return JsonResponse({'data': data, 'time': time, 'value': value})

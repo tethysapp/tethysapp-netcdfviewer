@@ -50,11 +50,6 @@ class Netcdfviewer(TethysAppBase):
                 controller='netcdfviewer.shapefile.user_geojsons'
             ),
             UrlMap(
-                name='get_point_values',
-                url='netcdfviewer/timeseries/get_point_values/',
-                controller='netcdfviewer.timeseries.get_point_values'
-            ),
-            UrlMap(
                 name='get_box_values',
                 url='netcdfviewer/timeseries/get_box_values/',
                 controller='netcdfviewer.timeseries.get_box_values'
