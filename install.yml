@@ -1,5 +1,5 @@
 # This file should be committed to your app code.
-version: 0.0.5
+version: 0.0.6
 # This should match the app - package name in your setup.py
 name: netcdfviewer
 
@@ -11,6 +11,7 @@ requirements:
       - conda-forge
     packages:
       - geopandas
+      - os
       - geomatics
       - xarray
       - requests
