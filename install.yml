@@ -11,6 +11,7 @@ requirements:
       - conda-forge
     packages:
       - geopandas
+      - geomatics
       - xarray
       - requests
       - beautifulsoup4
