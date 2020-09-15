@@ -21,13 +21,12 @@ def get_box_values(request):
     time_series.to_netcdf(path=path_to_netcdf)
 
     if not coord is False:
-        data = geomatics.timeseries.point([path_to_netcdf], var, (coord[0], coord[1]), dims=('latitude', 'longitude'), t_var='time')
+        data = geomatics.timeseries.point([path_to_netcdf], var, (coord[0], coord[1]), ('latitude', 'longitude'), 'time')
         time = 'datetime'
         value = 'values'
     else:
-        data = geomatics.timeseries.full_array_stats([path_to_netcdf], var, t_var='time')
+        data = geomatics.timeseries.full_array_stats([path_to_netcdf], var, 'time')
         time = 'datetime'
         value = 'mean'
-
 
     return JsonResponse({'data': data, 'time': time, 'value': value})
