@@ -63,16 +63,26 @@ def files(request):
 
 def metadata(request):
     url = request.GET['odurl']
+    print(url)
     ds = xr.open_dataset(url)
-    variables = []
+    dimensions = ds.coords
+    str_attrs = {}
+    variables = {}
+    var_attr = {}
+    dims = []
+
+    for dim in dimensions:
+        dims.append(dim)
+
+    for attr in ds.attrs:
+        str_attrs[str(attr)] = str(ds.attrs[attr])
 
     for var in ds.data_vars:
-        variables.append(var)
+        for attr in ds[var].attrs:
+            var_attr[str(attr)] = str(ds[var].attrs[attr])
 
-    attrs = ds.attrs
-    str_attrs = {}
+        variables[str(var)] = var_attr
+        var_attr = {}
 
-    for attr in attrs:
-        str_attrs[str(attr)] = str(attrs[attr])
+    return JsonResponse({'variables': variables, 'dims': dims, 'attrs': str_attrs})
 
-    return JsonResponse({'variables': variables, 'attrs': str_attrs})

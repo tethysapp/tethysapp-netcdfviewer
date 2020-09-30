@@ -13,7 +13,6 @@ mapObj.on(L.Draw.Event.CREATED, function (e) {
 shpLayer.on('click', function (e) {
   var layer = e.layer;
   var coords = layer.getBounds();
-  console.log(coords);
   var type = 'rectangle';
   get_timeseries(type, coords);
 });
@@ -24,7 +23,6 @@ function get_coords(e) {
     var type = 'rectangle';
     var coord = layer.getLatLngs();
     var coords = {'_southWest': {'lat': 0, 'lng': 0}, '_northEast': {'lat': 0, 'lng': 0}};
-    console.log(coords);
     coords['_northEast'].lat = coord[0][2].lat;
     coords['_southWest'].lng = coord[0][0].lng;
     coords['_southWest'].lat = coord[0][0].lat;
@@ -44,6 +42,20 @@ function get_timeseries(type, coords) {
       var coord = [];
       coord.push(coords.lat);
       coord.push(coords.lng);
+
+/*
+
+      https://thredds.servirglobal.net/thredds/ncss/point/climateserv/
+      ucsb-chirps-gefs/global/0.05deg/10dy/ucsb-chirps-gefs.daily.2020.nc4
+
+      https://thredds.servirglobal.net/thredds/ncss/climateserv/
+      ucsb-chirps-gefs/global/0.05deg/10dy/ucsb-chirps-gefs.daily.2020.nc4
+
+
+*/
+
+
+
       var maxlat = coord[0] + 0.5;
       var maxlng = coord[1] + 0.5;
       var minlat = coord[0] - 0.5;
@@ -57,6 +69,21 @@ function get_timeseries(type, coords) {
     }
 
     var vars = $('#variable-input').val();
+    var lat = $('#lat').val();
+    var lng = $('#lng').val();
+    var time = $('#time').val();
+
+    /////////Test Code
+    var north = maxlat;
+    var south = minlat;
+    var east = maxlng;
+    var west = minlng;
+    var SubsectionUrl = netcdfSubset.replace('point', '') + '?north=' + north + '&west=' + west + '&east=\n' +
+        east + '&south=' + south + '&disableProjSubset=on&horizStride=1&time_start=2020-01-01T00%3A00%3A00Z&' +
+        'time_end=2020-08-04T00%3A00%3A00Z&timeStride=1';
+    console.log('fullURL: ' + SubsectionUrl);
+
+    /////////End Test Code
     $.ajax({
       url: 'timeseries/get_box_values/',
       data: {
@@ -67,6 +94,9 @@ function get_timeseries(type, coords) {
         'coord': JSON.stringify(coord),
         'odurl': odurl,
         'var': vars,
+        'lat' : lat,
+        'lon' : lng,
+        'time' : time,
       },
       dataType: 'json',
       contentType: "application/json",
@@ -92,9 +122,6 @@ function draw_graph(data, time, value) {
         x.push(series[time][i]);
         y.push(series[value][i]);
     }
-
-    console.log(x)
-    console.log(y)
 
     let variable = $('#variable-input').val();
     let layout = {
