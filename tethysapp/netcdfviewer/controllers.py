@@ -60,20 +60,21 @@ def files(request):
 
     return JsonResponse({'folder': folder, 'files': files, 'correct_url': correct_url})
 
-
+# GET ALL METADATA FROM THE FILE, VARIABLES, AND DIMENTIONS
 def metadata(request):
+    # USE XARRAY TO GET METADATA INFORMATION USING AN OPENDAP URL
     url = request.GET['odurl']
-    print(url)
     ds = xr.open_dataset(url)
-    dimensions = ds.coords
     str_attrs = {}
     variables = {}
     var_attr = {}
     dims = []
 
-    for dim in dimensions:
+    # ADD ALL DIMENTIONS TO A LIST
+    for dim in ds.coords:
         dims.append(dim)
 
+    # ADD THE VARIABLES AND CORRESPONDING ATTRIBUTES TO A DICTIONARY
     for attr in ds.attrs:
         str_attrs[str(attr)] = str(ds.attrs[attr])
 

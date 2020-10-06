@@ -42,20 +42,6 @@ function get_timeseries(type, coords) {
       var coord = [];
       coord.push(coords.lat);
       coord.push(coords.lng);
-
-/*
-
-      https://thredds.servirglobal.net/thredds/ncss/point/climateserv/
-      ucsb-chirps-gefs/global/0.05deg/10dy/ucsb-chirps-gefs.daily.2020.nc4
-
-      https://thredds.servirglobal.net/thredds/ncss/climateserv/
-      ucsb-chirps-gefs/global/0.05deg/10dy/ucsb-chirps-gefs.daily.2020.nc4
-
-
-*/
-
-
-
       var maxlat = coord[0] + 0.5;
       var maxlng = coord[1] + 0.5;
       var minlat = coord[0] - 0.5;
@@ -67,21 +53,15 @@ function get_timeseries(type, coords) {
       var minlat = coords['_southWest'].lat;
       var minlng = coords['_southWest'].lng;
     }
-
     var vars = $('#variable-input').val();
     var lat = $('#lat').val();
     var lng = $('#lng').val();
     var time = $('#time').val();
-
     /////////Test Code
-    var north = maxlat;
-    var south = minlat;
-    var east = maxlng;
-    var west = minlng;
-    var SubsectionUrl = netcdfSubset.replace('point', '') + '?north=' + north + '&west=' + west + '&east=\n' +
-        east + '&south=' + south + '&disableProjSubset=on&horizStride=1&time_start=2020-01-01T00%3A00%3A00Z&' +
-        'time_end=2020-08-04T00%3A00%3A00Z&timeStride=1';
-    console.log('fullURL: ' + SubsectionUrl);
+    var subsetUrl = netcdfSubset.replace('point', '') + '?var=' + vars + '&north=' + maxlat + '&west=' + minlng + '&east=' + maxlng + '&south=' + minlat + '&disableProjSubset=on&horizStride=1&temporal=all';
+    console.log('fullURL: ' + subsetUrl);
+    console.log(coords);
+    console.log(coord)
 
     /////////End Test Code
     $.ajax({
@@ -93,6 +73,7 @@ function get_timeseries(type, coords) {
         'minlng': minlng,
         'coord': JSON.stringify(coord),
         'odurl': odurl,
+        'subsetURL': JSON.stringify(subsetUrl),
         'var': vars,
         'lat' : lat,
         'lon' : lng,
@@ -114,22 +95,18 @@ function get_timeseries(type, coords) {
 
 function draw_graph(data, time, value) {
     var series = $.parseJSON(data);
-    var length = Object.keys(series[time]).length;
     let x = [];
     let y = [];
-    var i;
-    for (i = 0; i < length; i++) {
+    for (var i = 0; i < Object.keys(series[time]).length; i++) {
         x.push(series[time][i]);
         y.push(series[value][i]);
     }
-
     let variable = $('#variable-input').val();
     let layout = {
         title: 'Mean of ' + variable,
-        xaxis: {title: 'Time'},
-        yaxis: {title: 'Amount (mm)'}
+        xaxis: {title: 'Time', type: 'datetime'},
+        yaxis: {title: 'Amount'}
     };
-
     let values = {
         x: x,
         y: y,
