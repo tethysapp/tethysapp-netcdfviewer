@@ -57,22 +57,11 @@ function get_timeseries(type, coords) {
     var lat = $('#lat').val();
     var lng = $('#lng').val();
     var time = $('#time').val();
-    /////////Test Code
     var subsetUrl = netcdfSubset.replace('point', '') + '?var=' + vars + '&north=' + maxlat + '&west=' + minlng + '&east=' + maxlng + '&south=' + minlat + '&disableProjSubset=on&horizStride=1&temporal=all';
-    console.log('fullURL: ' + subsetUrl);
-    console.log(coords);
-    console.log(coord)
-
-    /////////End Test Code
     $.ajax({
       url: 'timeseries/get_box_values/',
       data: {
-        'maxlat': maxlat,
-        'maxlng': maxlng,
-        'minlat': minlat,
-        'minlng': minlng,
         'coord': JSON.stringify(coord),
-        'odurl': odurl,
         'subsetURL': JSON.stringify(subsetUrl),
         'var': vars,
         'lat' : lat,

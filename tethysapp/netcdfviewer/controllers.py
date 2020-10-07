@@ -3,6 +3,7 @@ from django.shortcuts import render
 from tethys_sdk.permissions import login_required
 from tethys_sdk.gizmos import Button, TextInput, SelectInput, RangeSlider
 from bs4 import BeautifulSoup
+from siphon.catalog import TDSCatalog
 import xarray as xr
 import requests
 
@@ -37,53 +38,20 @@ def home(request):
 
 def files(request):
     url = request.GET['url']
-    response = requests.get(url, verify=False)
-    soup = BeautifulSoup(response.text, "html.parser")
-    correct_url = soup.title.text
-    correct_url = correct_url.replace('TdsStaticCatalog ', '')
-    correct_url = correct_url.replace('Catalog ', '')
-    correct_url = correct_url.replace(' ', '')
-    files = {}
+    ds = TDSCatalog(url)
+    folders_dict = {}
 
-    for link in soup.find_all('a'):
-        if hasattr(link.tt, 'text'):
-            files[link.tt.text] = link.get('href')
-            folder = True
+    folders = ds.catalog_refs
+    for x in enumerate(folders):
+        folders_dict[folders[x[0]].title] = folders[x[0]].href
 
-    if files == {}:
-        for link in soup.find_all('li'):
-            if not link.find_all('b') == []:
-                files[link.b.text] = link.a.text
-        folder = False
-        if files == {}:
-            files = False
+    files = ds.datasets
+    for x in enumerate(files):
+        folders_dict[files[x[0]].title] = files[x[0]].access_urls
 
-    return JsonResponse({'folder': folder, 'files': files, 'correct_url': correct_url})
+    files = False
+    correct_url = ds.catalog_url
+    return JsonResponse({'folder': folders_dict, 'files': files, 'correct_url': correct_url})
 
-# GET ALL METADATA FROM THE FILE, VARIABLES, AND DIMENTIONS
-def metadata(request):
-    # USE XARRAY TO GET METADATA INFORMATION USING AN OPENDAP URL
-    url = request.GET['odurl']
-    ds = xr.open_dataset(url)
-    str_attrs = {}
-    variables = {}
-    var_attr = {}
-    dims = []
 
-    # ADD ALL DIMENTIONS TO A LIST
-    for dim in ds.coords:
-        dims.append(dim)
-
-    # ADD THE VARIABLES AND CORRESPONDING ATTRIBUTES TO A DICTIONARY
-    for attr in ds.attrs:
-        str_attrs[str(attr)] = str(ds.attrs[attr])
-
-    for var in ds.data_vars:
-        for attr in ds[var].attrs:
-            var_attr[str(attr)] = str(ds[var].attrs[attr])
-
-        variables[str(var)] = var_attr
-        var_attr = {}
-
-    return JsonResponse({'variables': variables, 'dims': dims, 'attrs': str_attrs})
 

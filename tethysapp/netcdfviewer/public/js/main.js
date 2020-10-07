@@ -131,6 +131,9 @@ function get_files(url) {
       var passedFiles = result['files'];
       var folder = result['folder'];
       var correctURL = result['correct_url'];
+      console.log(passedFiles)
+      console.log(folder)
+      console.log(correctURL)
       if (correctURL.substr(0, 4) == 'http') {
         $('#url-input').val(correctURL);
       }
