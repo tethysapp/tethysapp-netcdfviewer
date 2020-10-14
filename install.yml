@@ -15,5 +15,6 @@ requirements:
       - xarray
       - requests
       - siphon
+      - netCDF4
   pip:
 post:
