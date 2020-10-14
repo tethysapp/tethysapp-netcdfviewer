@@ -1,16 +1,29 @@
 let firstlayeradded = false;
-let files = [];
-let wmsurl = '';
-let odurl = '';
-let netcdfSubset = '';
+let URLpath = [];
+let subsetURL = '';
+let wmsURL = '';
+let opendapURL = '';
 let shpfileAdded = false;
 
 add_user_layers();
 
+function update_filepath() {
+  if ($(this).attr('class') == 'folder') {
+    let newURL = $(this).attr('data-url');
+    $('#url-input').val(newURL);
+    get_files(newURL);
+  } else if ($(this).attr('class') == 'file') {
+    wmsURL = $(this).attr('data-wms-url');
+    opendapURL = $(this).attr('data-opendap-url');
+    subsetURL = $(this).attr('data-subset-url');
+    get_metadata();
+  }
+}
+
 function get_metadata() {
   $.ajax({
     url: '/apps/netcdfviewer/metadata/',
-    data: {'odurl': odurl,},
+    data: {'opendapURL': opendapURL,},
     dataType: 'json',
     contentType: "application/json",
     method: 'GET',
@@ -27,6 +40,7 @@ function get_metadata() {
 function update_wmslayer() {
   if (firstlayeradded == true) {
     layerControlObj.removeLayer(dataLayerObj);
+    mapObj.removeLayer(dataLayerObj);
   }
   dataLayerObj = data_layer();
   dataLayerObj.setOpacity($('#opacity-slider').val());
@@ -71,109 +85,94 @@ function print_metadata(variables, attrs, dims) {
   $('#file-metadata-button').css('background-color', 'rgba(205, 209, 253, 1)');
 }
 
-function update_filepath() {
-  var newURL = ''
-  var cont = true;
-  var href = $(this).attr('id');
-  var currentURL = $('#url-input').val();
-  var hrefArray = href.split('/')
-  var currentArray = currentURL.split('/');
-
-  if (currentURL !== files[files.length - 1]) {
-    files.push(currentURL);
-  }
-
-  currentArray.forEach(function (val, index,) {
-    hrefArray.forEach(function (val2, index2) {
-      if (val == val2 && val == 'thredds' && cont == true) {
-        for (var i = index; i <= currentArray.length; i++) {
-          currentArray.pop();
-        }
-        for (var i = 0; i <= hrefArray.length - 1; i++) {
-          currentArray.push(hrefArray[i]);
-        }
-        cont = false;
-      }
-    });
-  });
-
-  if (cont == true) {
-    currentArray.pop();
-    for (var i = 0; i <= hrefArray.length - 1; i++) {
-      currentArray.push(hrefArray[i]);
-    }
-  }
-
-  currentArray.forEach(function (value, i) {
-    if (value == '' || value == undefined) {
-      currentArray.splice(i, 1);
-    }
-    if (i == 0) {
-      newURL = currentArray[i];
-    } else if (i == 1) {
-      newURL = newURL + '//' + currentArray[i];
-    } else {
-      newURL = newURL + '/' + currentArray[i];
-    }
-  })
-  $('#url-input').val(newURL)
-  get_files(newURL);
-}
-
 function get_files(url) {
   $.ajax({
-    url: '/apps/netcdfviewer/files/',
+    url: '/apps/netcdfviewer/buildDataTree/',
     data: {'url': url,},
     dataType: 'json',
     contentType: "application/json",
     method: 'GET',
     success: function (result) {
-      var passedFiles = result['files'];
-      var folder = result['folder'];
+      var dataTree = result['dataTree'];
       var correctURL = result['correct_url'];
-      console.log(passedFiles)
-      console.log(folder)
-      console.log(correctURL)
-      if (correctURL.substr(0, 4) == 'http') {
-        $('#url-input').val(correctURL);
+      let html = ''
+      for (var folder in dataTree['folders']) {
+        html += '<div data-url="' + dataTree['folders'][folder] + '" class="folder" ' +
+            'style="width: 100%; height: 30px; overflow-y: hidden" ' +
+            'onclick="update_filepath.call(this)">' +
+            '<p class="fas" style="display: inline-block">&#xf07b; ' + folder + '</p></div>'
       }
-      if (passedFiles == false) {
-        $('#metadata-div').empty();
-        $('#metadata-div').append('<p style="padding: 10px 0px 10px 40px">NO DATA!!!</p>');
-      } else if (folder == true) {
-        var html = ''
-        if(passedFiles.length < 1 || passedFiles == undefined){
-          html = '<div style="width: 100%; height: 30px;"><p>No Files Found!!!</p></div>'
-        } else {
-          for (var file in passedFiles) {
-            html += '<div id="' + passedFiles[file] + '" class="file" style="width: 100%; height: 30px;" ' +
-                'onclick="update_filepath.call(this)"><p>' + file + '</p></div>';
-          }
-        }
-        $('#filetree-div').empty();
-        $('#filetree-div').append(html);
-      } else {
-        var currentURL = $('#url-input').val();
-        currentURL = currentURL.split('/thredds/')[0];
-        wmsurl = currentURL + passedFiles['WMS:'];
-        odurl = currentURL + passedFiles['OPENDAP:'];
-        netcdfSubset = currentURL + passedFiles['NetcdfSubset:']
-        var newURL = files[files.length - 1]
-        $('#url-input').val(newURL)
-        get_files(newURL);
-        files.pop();
-        get_metadata();
+      for (var file in dataTree['files']) {
+        html += '<div data-wms-url="' + dataTree['files'][file]['WMS'] + '' +
+            '" data-subset-url="' + dataTree['files'][file]['NetcdfSubset'] + '' +
+            '" data-opendap-url="' + dataTree['files'][file]['OPENDAP'] + '' +
+            '" class="file" style="width: 100%; height: 30px;" ' +
+            'onclick="update_filepath.call(this)"><p class="far" style="display: inline-block">' +
+            '&#xf1c5; ' + file + '</p></div>';
+      }
+      $('#filetree-div').empty();
+      $('#filetree-div').append(html);
+      $('#url-input').val(correctURL);
+      if (URLpath[URLpath.length - 1] !== correctURL) {
+        URLpath.push(correctURL);
       }
     }
   });
 }
 
+function inspectNCDF() {
+  $.ajax({
+    url: '/apps/netcdfviewer/timeseries/inspect_netcdf',
+    dataType: 'json',
+    contentType: "application/json",
+    method: 'GET',
+    success: function (result) {
+      var inspect = result['inspect'];
+      console.log(inspect)
+      $('#inspect-div').append(inspect);
+      $('#inspect-netcdf-model').modal('show');
+    }
+  });
+}
+
+function getDimensions() {
+  let variable = $('#variable-input').val();
+  console.log(variable);
+  $.ajax({
+    url: '/apps/netcdfviewer/getDimensions/',
+    data: {
+      'variable': variable,
+      'opendapURL': opendapURL,
+    },
+    dataType: 'json',
+    contentType: "application/json",
+    method: 'GET',
+    success: function (result) {
+      let dims = result['dims'];
+      let html = ''
+      console.log(dims)
+      for (var i = 0; i < dims.length; i++) {
+        html += '<option>' + dims[i] + '</option>';
+      }
+      console.log('html: ' + html)
+      $('#time').empty();
+      $('#time').append(html2);
+      $('#lat').empty();
+      $('#lat').append(html2);
+      $('#lat option:nth-child(2)').attr('selected', 'selected');
+      $('#lng').empty();
+      $('#lng').append(html2);
+      $('#lng option:nth-child(3)').attr('selected', 'selected');
+    }
+  });
+}
+
 $('#up-file').click(function () {
-  if (files.length !== 0) {
-    var newURL = files[files.length - 1]
+  if (URLpath.length !== 1) {
+    let newURL = URLpath[URLpath.length - 2]
     $('#url-input').val(newURL);
     get_files(newURL);
-    files.pop();
+    URLpath.pop();
   }
 })
 
@@ -182,7 +181,9 @@ $('#variable-input').change(function () {update_wmslayer();});
 $('#wmslayer-style').change(function () {update_wmslayer();});
 $('#wmslayer-bounds').change(function () {update_wmslayer();});
 $('#opacity-slider').change(function () {dataLayerObj.setOpacity($('#opacity-slider').val())});
+$('#variable-input').change(function () {getDimensions();});
 $('#upload-shp').click(function() {$('#uploadshp-modal').modal('show')});
+$('#inspect-netcdf').click(function () {inspectNCDF();});
 $('#file-metadata-button').click(function() {
   $('#var-metadata-div').css('display', 'none');
   $('#metadata-div').css('display', 'block');

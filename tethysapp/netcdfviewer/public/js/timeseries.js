@@ -35,7 +35,7 @@ function get_coords(e) {
 }
 
 function get_timeseries(type, coords) {
-  if (odurl == '') {
+  if (subsetURL == '') {
     alert('Please select a data layer.');
   } else {
     if (type === 'marker') {
@@ -57,12 +57,13 @@ function get_timeseries(type, coords) {
     var lat = $('#lat').val();
     var lng = $('#lng').val();
     var time = $('#time').val();
-    var subsetUrl = netcdfSubset.replace('point', '') + '?var=' + vars + '&north=' + maxlat + '&west=' + minlng + '&east=' + maxlng + '&south=' + minlat + '&disableProjSubset=on&horizStride=1&temporal=all';
+    var subsetUrlFull = subsetURL + '?var=' + vars + '&north=' + maxlat + '&west=' + minlng + '&east=' + maxlng + '&south=' + minlat + '&disableProjSubset=on&horizStride=1&temporal=all';
+    console.log(subsetUrlFull);
     $.ajax({
       url: 'timeseries/get_box_values/',
       data: {
         'coord': JSON.stringify(coord),
-        'subsetURL': JSON.stringify(subsetUrl),
+        'subsetURL': JSON.stringify(subsetUrlFull),
         'var': vars,
         'lat' : lat,
         'lon' : lng,

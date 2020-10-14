@@ -2,10 +2,9 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from tethys_sdk.permissions import login_required
 from tethys_sdk.gizmos import Button, TextInput, SelectInput, RangeSlider
-from bs4 import BeautifulSoup
 from siphon.catalog import TDSCatalog
-import xarray as xr
 import requests
+import xarray as xr
 
 
 @login_required()
@@ -36,10 +35,12 @@ def home(request):
     return render(request, 'netcdfviewer/home.html', context)
 
 
-def files(request):
+def build_data_tree(request):
     url = request.GET['url']
     ds = TDSCatalog(url)
+    data_tree = {}
     folders_dict = {}
+    files_dict = {}
 
     folders = ds.catalog_refs
     for x in enumerate(folders):
@@ -47,11 +48,43 @@ def files(request):
 
     files = ds.datasets
     for x in enumerate(files):
-        folders_dict[files[x[0]].title] = files[x[0]].access_urls
+        files_dict[files[x[0]].name] = files[x[0]].access_urls
 
-    files = False
+    data_tree['folders'] = folders_dict
+    data_tree['files'] = files_dict
     correct_url = ds.catalog_url
-    return JsonResponse({'folder': folders_dict, 'files': files, 'correct_url': correct_url})
+    return JsonResponse({'dataTree': data_tree, 'correct_url': correct_url})
 
 
+def metadata(request):
+    url = request.GET['opendapURL']
+    ds = xr.open_dataset(url)
+    dimensions = ds.coords
+    str_attrs = {}
+    variables = {}
+    var_attr = {}
+    dims = []
 
+    for dim in dimensions:
+        dims.append(dim)
+
+    for attr in ds.attrs:
+        str_attrs[str(attr)] = str(ds.attrs[attr])
+
+    for var in ds.data_vars:
+        for attr in ds[var].attrs:
+            var_attr[str(attr)] = str(ds[var].attrs[attr])
+
+        variables[str(var)] = var_attr
+        var_attr = {}
+
+    return JsonResponse({'variables': variables, 'dims': dims, 'attrs': str_attrs})
+
+
+def get_dimensions(request):
+    url = request.GET['opendapURL']
+    variable = request.GET['variable']
+    ds = xr.open_dataset(url)
+    dimensions = ds[variable].coords
+    print(dimensions)
+    return JsonResponse({'dims': dimensions})

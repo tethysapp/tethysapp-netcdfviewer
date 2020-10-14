@@ -60,6 +60,10 @@ b {
     background-color: rgba(130, 140, 250, 1);
 }
 
+.folder:hover {
+    background-color: rgba(130, 140, 250, 1);
+}
+
 .half-box {
     width: 90%;
     height: 86%;
@@ -88,4 +92,5 @@ button {
     border-color: #cccccc;
     margin-top: 10px;
 }
+
 

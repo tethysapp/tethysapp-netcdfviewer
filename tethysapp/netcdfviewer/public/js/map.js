@@ -40,14 +40,11 @@ function basemaps() {
 }
 
 function data_layer() {
-  if (firstlayeradded == true) {
-    mapObj.removeLayer(dataLayerObj);
-  }
   try {
     const layer = $('#variable-input').val();
     const range = $('#wmslayer-bounds').val();
     const style = $('#wmslayer-style').val();
-    const wmsLayer = L.tileLayer.wms(wmsurl, {
+    const wmsLayer = L.tileLayer.wms(wmsURL, {
       layers: layer,
       dimension: 'time',
       useCache: true,
@@ -58,7 +55,6 @@ function data_layer() {
       styles: style,
       colorscalerange: range,
     });
-
     wmsLayerTime = L.timeDimension.layer.wms(wmsLayer, {
       name: 'time',
       requestTimefromCapabilities: true,

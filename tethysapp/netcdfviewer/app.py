@@ -30,14 +30,9 @@ class Netcdfviewer(TethysAppBase):
                 controller='netcdfviewer.controllers.home'
             ),
             UrlMap(
-                name='files',
-                url='netcdfviewer/files',
-                controller='netcdfviewer.controllers.files'
-            ),
-            UrlMap(
-                name='metadata',
-                url='netcdfviewer/metadata',
-                controller='netcdfviewer.controllers.metadata'
+                name='build_data_tree',
+                url='netcdfviewer/buildDataTree',
+                controller='netcdfviewer.controllers.build_data_tree'
             ),
             UrlMap(
                 name='uploadShapefile',
@@ -53,6 +48,21 @@ class Netcdfviewer(TethysAppBase):
                 name='get_box_values',
                 url='netcdfviewer/timeseries/get_box_values/',
                 controller='netcdfviewer.timeseries.get_box_values'
+            ),
+            UrlMap(
+                name='metadata',
+                url='netcdfviewer/metadata',
+                controller='netcdfviewer.controllers.metadata'
+            ),
+            UrlMap(
+                name='inspect',
+                url='netcdfviewer/timeseries/inspect_netcdf',
+                controller='netcdfviewer.timeseries.inspect_netcdf'
+            ),
+            UrlMap(
+                name='getDimensions',
+                url='netcdfviewer/getDimensions',
+                controller='netcdfviewer.controllers.get_dimensions'
             ),
         )
 
