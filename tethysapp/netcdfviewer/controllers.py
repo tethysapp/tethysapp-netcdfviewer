@@ -24,7 +24,7 @@ def home(request):
 
     layer_range = TextInput(display_text='Set Data Bounds',
                             name='wmslayer-bounds',
-                            initial='0,100',
+                            initial='0,25',
                             )
 
     context = {
@@ -59,14 +59,9 @@ def build_data_tree(request):
 def metadata(request):
     url = request.GET['opendapURL']
     ds = xr.open_dataset(url)
-    dimensions = ds.coords
     str_attrs = {}
     variables = {}
     var_attr = {}
-    dims = []
-
-    for dim in dimensions:
-        dims.append(dim)
 
     for attr in ds.attrs:
         str_attrs[str(attr)] = str(ds.attrs[attr])
@@ -78,13 +73,27 @@ def metadata(request):
         variables[str(var)] = var_attr
         var_attr = {}
 
-    return JsonResponse({'variables': variables, 'dims': dims, 'attrs': str_attrs})
+    variables_sorted = sorted(variables)
+    return JsonResponse({'variables': variables, 'variables_sorted': variables_sorted, 'attrs': str_attrs})
 
 
 def get_dimensions(request):
     url = request.GET['opendapURL']
     variable = request.GET['variable']
     ds = xr.open_dataset(url)
-    dimensions = ds[variable].coords
-    print(dimensions)
-    return JsonResponse({'dims': dimensions})
+    variables = {}
+    var_attr = {}
+    dimensions = []
+
+    for dim in ds[variable].coords:
+        dimensions.append(dim)
+
+    for var in ds.data_vars:
+        for attr in ds[var].attrs:
+            var_attr[str(attr)] = str(ds[var].attrs[attr])
+
+        variables[str(var)] = var_attr
+        var_attr = {}
+
+    dimensions.sort()
+    return JsonResponse({'variables': variables, 'dims': dimensions})

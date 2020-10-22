@@ -16,6 +16,7 @@ def get_box_values(request):
     var = request.GET['var']
     coord = json.loads(request.GET['coord'])
     path_to_netcdf = os.path.join(os.path.dirname(__file__), 'workspaces', 'app_workspace', 'temp.nc')
+    print(subset_url)
 
     urllib.request.urlretrieve(json.loads(subset_url), path_to_netcdf)
 
@@ -29,7 +30,7 @@ def get_box_values(request):
         value = 'mean'
 
     ds = xarray.open_dataset(path_to_netcdf)
-    times = ds.coords['time']
+    times = ds.coords[time]
     data['datetime'] = times
 
     for t in enumerate(data.datetime):

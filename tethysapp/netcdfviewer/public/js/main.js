@@ -29,9 +29,10 @@ function get_metadata() {
     method: 'GET',
     success: function (result) {
       var variables = result['variables'];
+      var variablesSorted = result['variables_sorted']
       var attrs = result['attrs'];
-      var dims = result['dims'];
-      print_metadata(variables, attrs, dims);
+      print_metadata(variables, variablesSorted, attrs);
+      getDimensions();
       update_wmslayer();
     }
   })
@@ -47,42 +48,61 @@ function update_wmslayer() {
   layerControlObj.addOverlay(dataLayerObj, 'netcdf Layer');
 }
 
-function print_metadata(variables, attrs, dims) {
+function print_metadata(variables, variablesSorted, attrs) {
   var html = '';
   var html2 = '';
   var html3 = '';
-  var html4 = '';
-  for (let vars in variables) {
-    html += '<option>' + vars + '</option>';
-  }
-  for (var i = 0; i < dims.length; i++) {
-    html2 += '<option>' + dims[i] + '</option>';
-  }
-  for (var att in attrs) {
-    html3 += '<b style="padding-left: 40px">' + att + ':<b/><p style="padding-left: 40px">' + attrs[att] + '</p>';
-  }
-  for (var varb in variables) {
-    html4 += '<b style="padding-left: 40px">' + varb + ':<b/>'
-    for (var attr in variables[varb]) {
-      html4 += '<p style="padding-left: 40px">' + attr + ': ' + variables[varb][attr] + '</p>';
-    }
+  for (var i = 0; i < variablesSorted.length; i++) {
+    html += '<option>' + variablesSorted[i] + '</option>';
   }
   $('#variable-input').empty();
   $('#variable-input').append(html);
-  $('#variable-input option:nth-child(2)').attr('selected', 'selected');
-  $('#time').empty();
-  $('#time').append(html2);
-  $('#lat').empty();
-  $('#lat').append(html2);
-  $('#lat option:nth-child(2)').attr('selected', 'selected');
-  $('#lng').empty();
-  $('#lng').append(html2);
-  $('#lng option:nth-child(3)').attr('selected', 'selected');
+  for (var att in attrs) {
+    html2 += '<b style="padding-left: 40px">' + att + ':<b/><p style="padding-left: 40px">' + attrs[att] + '</p>';
+  }
   $('#metadata-div').empty();
-  $('#metadata-div').append(html3);
-  $('#var-metadata-div').empty();
-  $('#var-metadata-div').append(html4);
+  $('#metadata-div').append(html2);
   $('#file-metadata-button').css('background-color', 'rgba(205, 209, 253, 1)');
+}
+
+
+function getDimensions() {
+  let variable = $('#variable-input').val();
+  $.ajax({
+    url: '/apps/netcdfviewer/getDimensions/',
+    data: {
+      'variable': variable,
+      'opendapURL': opendapURL,
+    },
+    dataType: 'json',
+    contentType: "application/json",
+    method: 'GET',
+    success: function (result) {
+      let dims = result['dims'];
+      var variables = result['variables'];
+      let html = ''
+      for (var i = 0; i < dims.length; i++) {
+        html += '<option>' + dims[i] + '</option>';
+      }
+      $('#time').empty();
+      $('#time').append(html);
+      $('#time option:nth-child(3)').attr('selected', 'selected');
+      $('#lat').empty();
+      $('#lat').append(html);
+      $('#lat option:nth-child(1)').attr('selected', 'selected');
+      $('#lng').empty();
+      $('#lng').append(html);
+      $('#lng option:nth-child(2)').attr('selected', 'selected');
+
+      var html3 = '';
+      html3 += '<b style="padding-left: 40px">' + variable + ':<b/>'
+      for (var attr in variables[variable]) {
+        html3 += '<p style="padding-left: 40px">' + attr + ': ' + variables[variable][attr] + '</p>';
+      }
+      $('#var-metadata-div').empty();
+      $('#var-metadata-div').append(html3);
+      }
+  });
 }
 
 function get_files(url) {
@@ -96,12 +116,6 @@ function get_files(url) {
       var dataTree = result['dataTree'];
       var correctURL = result['correct_url'];
       let html = ''
-      for (var folder in dataTree['folders']) {
-        html += '<div data-url="' + dataTree['folders'][folder] + '" class="folder" ' +
-            'style="width: 100%; height: 30px; overflow-y: hidden" ' +
-            'onclick="update_filepath.call(this)">' +
-            '<p class="fas" style="display: inline-block">&#xf07b; ' + folder + '</p></div>'
-      }
       for (var file in dataTree['files']) {
         html += '<div data-wms-url="' + dataTree['files'][file]['WMS'] + '' +
             '" data-subset-url="' + dataTree['files'][file]['NetcdfSubset'] + '' +
@@ -109,6 +123,12 @@ function get_files(url) {
             '" class="file" style="width: 100%; height: 30px;" ' +
             'onclick="update_filepath.call(this)"><p class="far" style="display: inline-block">' +
             '&#xf1c5; ' + file + '</p></div>';
+      }
+      for (var folder in dataTree['folders']) {
+        html += '<div data-url="' + dataTree['folders'][folder] + '" class="folder" ' +
+            'style="width: 100%; height: 30px; overflow-y: hidden" ' +
+            'onclick="update_filepath.call(this)">' +
+            '<p class="fas" style="display: inline-block">&#xf07b; ' + folder + '</p></div>'
       }
       $('#filetree-div').empty();
       $('#filetree-div').append(html);
@@ -128,41 +148,8 @@ function inspectNCDF() {
     method: 'GET',
     success: function (result) {
       var inspect = result['inspect'];
-      console.log(inspect)
       $('#inspect-div').append(inspect);
       $('#inspect-netcdf-model').modal('show');
-    }
-  });
-}
-
-function getDimensions() {
-  let variable = $('#variable-input').val();
-  console.log(variable);
-  $.ajax({
-    url: '/apps/netcdfviewer/getDimensions/',
-    data: {
-      'variable': variable,
-      'opendapURL': opendapURL,
-    },
-    dataType: 'json',
-    contentType: "application/json",
-    method: 'GET',
-    success: function (result) {
-      let dims = result['dims'];
-      let html = ''
-      console.log(dims)
-      for (var i = 0; i < dims.length; i++) {
-        html += '<option>' + dims[i] + '</option>';
-      }
-      console.log('html: ' + html)
-      $('#time').empty();
-      $('#time').append(html2);
-      $('#lat').empty();
-      $('#lat').append(html2);
-      $('#lat option:nth-child(2)').attr('selected', 'selected');
-      $('#lng').empty();
-      $('#lng').append(html2);
-      $('#lng option:nth-child(3)').attr('selected', 'selected');
     }
   });
 }
