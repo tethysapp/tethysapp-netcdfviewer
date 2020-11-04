@@ -28,10 +28,9 @@ function get_metadata() {
     contentType: "application/json",
     method: 'GET',
     success: function (result) {
-      var variables = result['variables'];
       var variablesSorted = result['variables_sorted']
       var attrs = result['attrs'];
-      print_metadata(variables, variablesSorted, attrs);
+      print_metadata(variablesSorted, attrs);
       getDimensions();
       update_wmslayer();
     }
@@ -48,10 +47,9 @@ function update_wmslayer() {
   layerControlObj.addOverlay(dataLayerObj, 'netcdf Layer');
 }
 
-function print_metadata(variables, variablesSorted, attrs) {
+function print_metadata(variablesSorted, attrs) {
   var html = '';
   var html2 = '';
-  var html3 = '';
   for (var i = 0; i < variablesSorted.length; i++) {
     html += '<option>' + variablesSorted[i] + '</option>';
   }
@@ -148,8 +146,9 @@ function inspectNCDF() {
     method: 'GET',
     success: function (result) {
       var inspect = result['inspect'];
-      $('#inspect-div').append(inspect);
-      $('#inspect-netcdf-model').modal('show');
+      console.log(inspect);
+      /*$('#inspect-div').append(inspect);
+      $('#inspect-netcdf-model').modal('show');*/
     }
   });
 }

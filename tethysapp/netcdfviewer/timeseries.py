@@ -1,5 +1,4 @@
 from django.http import JsonResponse
-import xarray
 import geomatics
 import json
 import requests
@@ -16,6 +15,7 @@ def get_box_values(request):
     var = request.GET['var']
     coord = json.loads(request.GET['coord'])
     path_to_netcdf = os.path.join(os.path.dirname(__file__), 'workspaces', 'app_workspace', 'temp.nc')
+
     print(subset_url)
 
     urllib.request.urlretrieve(json.loads(subset_url), path_to_netcdf)
@@ -29,9 +29,19 @@ def get_box_values(request):
         datetime = 'datetime'
         value = 'mean'
 
-    ds = xarray.open_dataset(path_to_netcdf)
-    times = ds.coords[time]
-    data['datetime'] = times
+    #fix times
+    time_dic = []
+
+    ds = nc.Dataset(path_to_netcdf)
+    units = ds[time].units
+    times = ds[time][:]
+    for time in times:
+        ti = nc.num2date(time, units)
+        time_dic.append(ti)
+
+    ds.close()
+    data['datetime'] = time_dic
+    ##
 
     for t in enumerate(data.datetime):
         data.datetime[t[0]] = str(t[1])
@@ -40,25 +50,28 @@ def get_box_values(request):
 
 
 def inspect_netcdf(request):
+    inspect = {}
+    variable = {}
     path_to_netcdf = os.path.join(os.path.dirname(__file__), 'workspaces', 'app_workspace', 'temp.nc')
     nc_obj = nc.Dataset(path_to_netcdf, 'r', clobber=False, diskless=True, persist=False)
 
-    inspect = "This is your netCDF python object \n" + str(nc_obj) + "\n\n " \
-                "There are " + str(len(nc_obj.variables)) + " variables \n " \
-                "There are " + str(len(nc_obj.dimensions)) + " dimensions \n\n " \
-                "These are the global attributes of the netcdf file \n" + str(nc_obj.__dict__) + "\n\n" \
-                "Detailed view of each variable"
+    inspect['object'] = str(nc_obj)
+    inspect['varLength'] = str(len(nc_obj.variables))
+    inspect['dimLength'] = str(len(nc_obj.dimensions))
+    inspect['globAtt'] = str(nc_obj.__dict__)
 
-    for variable in nc_obj.variables.keys():
-        inspect += "Variable Name:  " + str(variable) + "\nThe view of this variable in the netCDF python object\n"\
-                   + str(nc_obj[variable]) + "\nThe data array stored in this variable\n"\
-                   + str(nc_obj[variable][:]) + "\nThe dimensions associated with this variable\n"\
-                   + str(nc_obj[variable].dimensions) + "\nThe metadata associated with this variable\n"\
-                   + str(nc_obj[variable].__dict__)
+    for vars in nc_obj.variables.keys():
+        variable['varName'] = str(vars)
+        variable['varView'] = str(nc_obj[vars])
+        variable['varData'] = str(nc_obj[vars][:])
+        variable['varDims'] = str(nc_obj[vars].dimensions)
+        variable['varMeta'] = str(nc_obj[vars].__dict__)
+        inspect[str(vars)] = variable
+        variable = {}
 
-    for dimension in nc_obj.dimensions.keys():
-        inspect += str(nc_obj.dimensions[dimension].size)
+    for dims in nc_obj.dimensions.keys():
+        inspect[str(dims)] = str(nc_obj.dimensions[dims].size)
+
 
     nc_obj.close()
-    print(inspect)
     return JsonResponse({'inspect': inspect})

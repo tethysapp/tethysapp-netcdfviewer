@@ -4,7 +4,7 @@ from tethys_sdk.permissions import login_required
 from tethys_sdk.gizmos import Button, TextInput, SelectInput, RangeSlider
 from siphon.catalog import TDSCatalog
 import requests
-import xarray as xr
+import netCDF4
 
 
 @login_required()
@@ -12,26 +12,20 @@ def home(request):
     """
     Controller for the app home page.
     """
-    layer_style = SelectInput(display_text='Select Color Style',
-                              name='wmslayer-style',
-                              multiple=False,
-                              options=[('RAINBOW', 'boxfill/rainbow'), ('OCCAM', 'boxfill/occam'),
-                                       ('ALG', 'boxfill/alg'), ('ALG2', 'boxfill/alg2'),
-                                       ('GRAYSCALE', 'boxfill/greyscale'), ('SST_36', 'boxfill/sst_36'),
-                                       ('NC VIEW', 'boxfill/ncview'), ('RED BLUE', 'boxfill/redblue')],
-                              initial=['RAINBOW'],
-                              )
-
-    layer_range = TextInput(display_text='Set Data Bounds',
-                            name='wmslayer-bounds',
-                            initial='0,25',
-                            )
-
+    save_button = Button(
+        display_text='',
+        name='save-button',
+        icon='glyphicon glyphicon-floppy-disk',
+        style='success',
+        attributes={
+            'data-toggle':'tooltip',
+            'data-placement':'top',
+            'title':'Save'
+        }
+    )
     context = {
-        'layer_style': layer_style,
-        'layer_range': layer_range,
+        'save_button': save_button,
     }
-
     return render(request, 'netcdfviewer/home.html', context)
 
 
@@ -58,42 +52,35 @@ def build_data_tree(request):
 
 def metadata(request):
     url = request.GET['opendapURL']
-    ds = xr.open_dataset(url)
+    ds = netCDF4.Dataset(url)
     str_attrs = {}
-    variables = {}
-    var_attr = {}
+    variables = []
 
-    for attr in ds.attrs:
-        str_attrs[str(attr)] = str(ds.attrs[attr])
+    for attr in ds.__dict__:
+        str_attrs[str(attr)] = str(ds.__dict__[attr])
 
-    for var in ds.data_vars:
-        for attr in ds[var].attrs:
-            var_attr[str(attr)] = str(ds[var].attrs[attr])
-
-        variables[str(var)] = var_attr
-        var_attr = {}
+    for var in ds.variables:
+        variables.append(var)
 
     variables_sorted = sorted(variables)
-    return JsonResponse({'variables': variables, 'variables_sorted': variables_sorted, 'attrs': str_attrs})
+    return JsonResponse({'variables_sorted': variables_sorted, 'attrs': str_attrs})
 
 
 def get_dimensions(request):
     url = request.GET['opendapURL']
     variable = request.GET['variable']
-    ds = xr.open_dataset(url)
+    ds = netCDF4.Dataset(url)
     variables = {}
     var_attr = {}
     dimensions = []
 
-    for dim in ds[variable].coords:
+    for dim in ds[variable].dimensions:
         dimensions.append(dim)
 
-    for var in ds.data_vars:
-        for attr in ds[var].attrs:
-            var_attr[str(attr)] = str(ds[var].attrs[attr])
+    for attr in ds[variable].__dict__:
+        var_attr[str(attr)] = str(ds[variable].__dict__[attr])
 
-        variables[str(var)] = var_attr
-        var_attr = {}
+    variables[variable] = var_attr
 
     dimensions.sort()
     return JsonResponse({'variables': variables, 'dims': dimensions})

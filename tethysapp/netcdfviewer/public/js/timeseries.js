@@ -40,8 +40,6 @@ function get_timeseries(type, coords) {
   } else {
     if (type === 'marker') {
       var coord = [];
-      coord.push(coords.lat);
-      coord.push(coords.lng);
       var maxlat = coord[0] + 0.5;
       var maxlng = coord[1] + 0.5;
       var minlat = coord[0] - 0.5;
@@ -58,8 +56,6 @@ function get_timeseries(type, coords) {
     var lng = $('#lng').val();
     var time = $('#time').val();
     var subsetUrlFull = subsetURL + '?var=' + vars + '&north=' + maxlat + '&west=' + minlng + '&east=' + maxlng + '&south=' + minlat + '&disableProjSubset=on&horizStride=1&temporal=all';
-    console.log(coord);
-    console.log(subsetUrlFull)
     $.ajax({
       url: 'timeseries/get_box_values/',
       data: {
