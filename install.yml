@@ -12,7 +12,6 @@ requirements:
     packages:
       - geopandas
       - geomatics
-      - xarray
       - requests
       - siphon
       - netCDF4

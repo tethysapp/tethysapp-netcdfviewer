@@ -16,10 +16,8 @@ def get_box_values(request):
     coord = json.loads(request.GET['coord'])
     path_to_netcdf = os.path.join(os.path.dirname(__file__), 'workspaces', 'app_workspace', 'temp.nc')
 
-    print(subset_url)
-
     urllib.request.urlretrieve(json.loads(subset_url), path_to_netcdf)
-
+    print(lat, lon)
     if coord is not False:
         data = geomatics.timeseries.point([path_to_netcdf], var, (coord[0], coord[1]), (lat, lon), time)
         datetime = 'datetime'
@@ -41,7 +39,6 @@ def get_box_values(request):
 
     ds.close()
     data['datetime'] = time_dic
-    ##
 
     for t in enumerate(data.datetime):
         data.datetime[t[0]] = str(t[1])
