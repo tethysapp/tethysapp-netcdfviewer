@@ -8,6 +8,7 @@ let drawControl = new L.Control.Draw({
         edit: true,
     },
     draw: {
+        marker: false,
         polyline: false,
         circlemarker: false,
         circle: false,

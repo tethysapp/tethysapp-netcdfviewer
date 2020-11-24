@@ -63,7 +63,6 @@ function print_metadata(variablesSorted, attrs) {
   $('#file-metadata-button').css('background-color', 'rgba(205, 209, 253, 1)');
 }
 
-
 function getDimensions() {
   let variable = $('#variable-input').val();
   $.ajax({
@@ -112,33 +111,36 @@ function get_files(url) {
     method: 'GET',
     success: function (result) {
       var dataTree = result['dataTree'];
-      var correctURL = result['correct_url'];
-      let html = ''
-      for (var file in dataTree['files']) {
-        html += '<div data-wms-url="' + dataTree['files'][file]['WMS'] + '' +
-            '" data-subset-url="' + dataTree['files'][file]['NetcdfSubset'] + '' +
-            '" data-opendap-url="' + dataTree['files'][file]['OPENDAP'] + '' +
-            '" class="file" style="width: 100%; height: 30px;" ' +
-            'onclick="update_filepath.call(this)"><p class="far" style="display: inline-block">' +
-            '&#xf1c5; ' + file + '</p></div>';
-      }
-      for (var folder in dataTree['folders']) {
-        html += '<div data-url="' + dataTree['folders'][folder] + '" class="folder" ' +
-            'style="width: 100%; height: 30px; overflow-y: hidden" ' +
-            'onclick="update_filepath.call(this)">' +
-            '<p class="fas" style="display: inline-block">&#xf07b; ' + folder + '</p></div>'
-      }
-      $('#filetree-div').empty();
-      $('#filetree-div').append(html);
-      $('#url-input').val(correctURL);
-      if (URLpath[URLpath.length - 1] !== correctURL) {
-        URLpath.push(correctURL);
+      if (dataTree == 'Invalid URL') {
+        alert(dataTree)
+      } else {
+        var correctURL = result['correct_url'];
+        let html = ''
+        for (var file in dataTree['files']) {
+          html += '<div data-wms-url="' + dataTree['files'][file]['WMS'] + '' +
+              '" data-subset-url="' + dataTree['files'][file]['NetcdfSubset'] + '' +
+              '" data-opendap-url="' + dataTree['files'][file]['OPENDAP'] + '' +
+              '" class="file" ' +
+              'onclick="update_filepath.call(this)"><p class="far" style="display: inline-block">' +
+              '&#xf1c5; ' + file + '</p></div>';
+        }
+        for (var folder in dataTree['folders']) {
+          html += '<div data-url="' + dataTree['folders'][folder] + '" class="folder" ' +
+              'onclick="update_filepath.call(this)">' +
+              '<p class="fas" style="display: inline-block">&#xf07b; ' + folder + '</p></div>'
+        }
+        $('#filetree-div').empty();
+        $('#filetree-div').append(html);
+        $('#url-input').val(correctURL);
+        if (URLpath[URLpath.length - 1] !== correctURL) {
+          URLpath.push(correctURL);
+        }
       }
     }
   });
 }
 
-function inspectNCDF() {
+/*function inspectNCDF() {
   $.ajax({
     url: '/apps/netcdfviewer/timeseries/inspect_netcdf',
     dataType: 'json',
@@ -146,12 +148,11 @@ function inspectNCDF() {
     method: 'GET',
     success: function (result) {
       var inspect = result['inspect'];
-      console.log(inspect);
-      /*$('#inspect-div').append(inspect);
-      $('#inspect-netcdf-model').modal('show');*/
+      $('#inspect-div').append(inspect);
+      $('#inspect-netcdf-model').modal('show');
     }
   });
-}
+}*/
 
 $('#up-file').click(function () {
   if (URLpath.length !== 1) {
@@ -169,7 +170,7 @@ $('#wmslayer-bounds').change(function () {update_wmslayer();});
 $('#opacity-slider').change(function () {dataLayerObj.setOpacity($('#opacity-slider').val())});
 $('#variable-input').change(function () {getDimensions();});
 $('#upload-shp').click(function() {$('#uploadshp-modal').modal('show')});
-$('#inspect-netcdf').click(function () {inspectNCDF();});
+/*$('#inspect-netcdf').click(function () {inspectNCDF();});*/
 $('#file-metadata-button').click(function() {
   $('#var-metadata-div').css('display', 'none');
   $('#metadata-div').css('display', 'block');

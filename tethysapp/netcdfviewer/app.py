@@ -30,6 +30,11 @@ class Netcdfviewer(TethysAppBase):
                 controller='netcdfviewer.controllers.home'
             ),
             UrlMap(
+                name='api',
+                url='netcdfviewer/api',
+                controller='netcdfviewer.controllers.api'
+            ),
+            UrlMap(
                 name='build_data_tree',
                 url='netcdfviewer/buildDataTree',
                 controller='netcdfviewer.controllers.build_data_tree'
@@ -53,11 +58,6 @@ class Netcdfviewer(TethysAppBase):
                 name='metadata',
                 url='netcdfviewer/metadata',
                 controller='netcdfviewer.controllers.metadata'
-            ),
-            UrlMap(
-                name='inspect',
-                url='netcdfviewer/timeseries/inspect_netcdf',
-                controller='netcdfviewer.timeseries.inspect_netcdf'
             ),
             UrlMap(
                 name='getDimensions',

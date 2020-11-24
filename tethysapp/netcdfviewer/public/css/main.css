@@ -56,8 +56,20 @@ b {
     overflow-y: scroll;
 }
 
+.file {
+    width: 100%;
+    height: auto;
+    overflow-y: hidden;
+}
+
 .file:hover {
     background-color: rgba(130, 140, 250, 1);
+}
+
+.folder {
+    width: 100%;
+    height: auto;
+    overflow-y: hidden;
 }
 
 .folder:hover {

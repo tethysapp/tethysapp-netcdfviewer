@@ -9,32 +9,21 @@ import netCDF4
 
 @login_required()
 def home(request):
-    """
-    Controller for the app home page.
-    """
-    save_button = Button(
-        display_text='',
-        name='save-button',
-        icon='glyphicon glyphicon-floppy-disk',
-        style='success',
-        attributes={
-            'data-toggle':'tooltip',
-            'data-placement':'top',
-            'title':'Save'
-        }
-    )
-    context = {
-        'save_button': save_button,
-    }
-    return render(request, 'netcdfviewer/home.html', context)
+    return render(request, 'netcdfviewer/home.html',)
 
+def api(request):
+    return render(request, 'netcdfviewer/api.html',)
 
 def build_data_tree(request):
     url = request.GET['url']
-    ds = TDSCatalog(url)
     data_tree = {}
     folders_dict = {}
     files_dict = {}
+
+    try:
+        ds = TDSCatalog(url)
+    except RuntimeError:
+        return JsonResponse({'dataTree': 'Invalid URL'})
 
     folders = ds.catalog_refs
     for x in enumerate(folders):
@@ -52,9 +41,13 @@ def build_data_tree(request):
 
 def metadata(request):
     url = request.GET['opendapURL']
-    ds = netCDF4.Dataset(url)
     str_attrs = {}
     variables = []
+
+    try:
+        ds = netCDF4.Dataset(url)
+    except RuntimeError:
+        return JsonResponse({'variables_sorted': 'Invalid file'})
 
     for attr in ds.__dict__:
         str_attrs[str(attr)] = str(ds.__dict__[attr])
