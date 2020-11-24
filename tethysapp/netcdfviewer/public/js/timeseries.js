@@ -48,9 +48,7 @@ function get_timeseries(coord) {
         if (typeof(data) == String) {
           alert(data);
         } else {
-          var time = result['time'];
-          var value = result['value'];
-          draw_graph(data, time, value);
+          draw_graph(data);
           $('#loading-model').modal('hide');
           $('#timeseries-model').modal('show');
         }
@@ -59,13 +57,13 @@ function get_timeseries(coord) {
   }
 }
 
-function draw_graph(data, time, value) {
+function draw_graph(data) {
     var series = $.parseJSON(data);
     let x = [];
     let y = [];
-    for (var i = 0; i < Object.keys(series[time]).length; i++) {
-        x.push(series[time][i]);
-        y.push(series[value][i]);
+    for (var i = 0; i < Object.keys(series['timeseries']).length; i++) {
+        x.push(series['timeseries'][i]);
+        y.push(series['mean'][i]);
     }
     let variable = $('#variable-input').val();
     let layout = {
