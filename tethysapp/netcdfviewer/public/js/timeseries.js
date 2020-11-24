@@ -25,6 +25,7 @@ function get_timeseries(coord) {
   if (subsetURL == '') {
     alert('Please select a data layer.');
   } else {
+    $('#loading-model').modal('show');
     var maxlat = coord[0][2].lat;
     var maxlng = coord[0][2].lng;
     var minlat = coord[0][0].lat;
@@ -50,6 +51,7 @@ function get_timeseries(coord) {
           var time = result['time'];
           var value = result['value'];
           draw_graph(data, time, value);
+          $('#loading-model').modal('hide');
           $('#timeseries-model').modal('show');
         }
       },

@@ -112,9 +112,6 @@ def get_box_values(request):
     for t in enumerate(data.datetime):
         data.datetime[t[0]] = str(t[1])
 
-    print(data)
-    print(datetime)
-
     return JsonResponse({'data': data, 'time': datetime, 'value': value})
 
 
